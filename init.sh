@@ -10,6 +10,6 @@ git remote set-branches git-repo-commons "${REPO_TYPE}"'/*'
 git fetch git-repo-commons
 
 git subtree -P .bin add --squash git-repo-commons/${REPO_TYPE}/bin
-git subtree -P .github add --squash git-repo-commons/${REPO_TYPE}/workflows
+git subtree -P .github add --squash git-repo-commons/${REPO_TYPE}/github
 
 popd
