@@ -3,7 +3,7 @@ name: Update Subtree Branches
 on:
   push:
     paths:
-      - gradle/*
+      - "gradle/**"
     branches:
       - "main"
       - "feature/**"
