@@ -19,7 +19,7 @@ on:
 
 jobs:
   build:
-    if: contains('["renelink"]', github.actor)
+#    if: contains('["renelink"]', github.actor)
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -55,7 +55,7 @@ jobs:
 
       - name: Build with Gradle Wrapper
         run: |
-          ./gradlew_release ${{ steps.validate.outputs.RELEASE_ARG }}
+          ./.bin/gradlew_release ${{ steps.validate.outputs.RELEASE_ARG }}
 
       - name: Push changes
         uses: ad-m/github-push-action@master
