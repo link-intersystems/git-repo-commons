@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "gradle/**"
+      - "updateSubtreeBranches.sh"
     branches:
       - "main"
       - "feature/**"
@@ -34,3 +35,4 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.PUSH_TOKEN }}
+          branch: "refs/heads/gradle/*"
