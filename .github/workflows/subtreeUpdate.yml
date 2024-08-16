@@ -28,8 +28,7 @@ jobs:
 
       - name: Update Subtree Branches
         run: |
-          git subtree split -P gradle/.bin/ -b gradle/bin
-          git subtree split -P gradle/.github/ -b gradle/github
+          ./updateSubtreeBranches.sh
 
       - name: Push changes
         uses: ad-m/github-push-action@master
