@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+PARENT_DIR="$(dirname "$SCRIPT_DIR")"
+
+RELEASE_STRATEGY="patch"
+
+if [ ! -z "$1" ]; then
+  RELEASE_STRATEGY="$1"
+  shift
+fi
+
+function printHelp(){
+   >&2 echo "Usage: $(basename "$0") [patch|minor|major]"
+}
+
+function currentVersion() {
+  echo $(${SCRIPT_DIR}/gradlew properties -q | awk '/^version:/ {print $2}')
+}
+
+increment_version() {
+  local delimiter=.
+  local array=($(echo "$1" | tr $delimiter '\n'))
+  array[$2]=$((array[$2]+1))
+
+  for (( j=$(($2+1)); j<${#array[@]}; j++ ));
+  do
+    array[$j]=0
+  done
+
+  echo $(local IFS=$delimiter ; echo "${array[*]}")
+}
+
+shopt -s extglob
+case "$RELEASE_STRATEGY" in
+      "--help" | "-?" )
+        printHelp
+      ;;
+      "patch" )
+        # Nothing to do
+      ;;
+      "minor" )
+        CURRENT_VERSION=$(currentVersion)
+        RELEASE_VERSION=$(increment_version ${CURRENT_VERSION} 1)
+      ;;
+      "major" )
+        CURRENT_VERSION=$(currentVersion)
+        RELEASE_VERSION=$(increment_version ${CURRENT_VERSION} 0)
+      ;;
+      +([0-9])?(.+([0-9]))?(.+([0-9])) )
+        RELEASE_VERSION="$RELEASE_STRATEGY-SNAPSHOT"
+      ;;
+      *)
+        printHelp
+      ;;
+esac
+
+echo "Executing ${RELEASE_STRATEGY} release"
+
+if [ ! -z "${RELEASE_VERSION}" ]; then
+  ${PARENT_DIR}/gradlew --info -Prelease.useAutomaticVersion=true -Prelease.newVersion=${RELEASE_VERSION} :updateVersion :commitNewVersion
+fi
+
+exec ${PARENT_DIR}/gradlew --info -Prelease.useAutomaticVersion=true release "$@"
