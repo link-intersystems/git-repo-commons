@@ -57,8 +57,10 @@ esac
 
 echo "Executing ${RELEASE_STRATEGY} release"
 
+source "${SCRIPT_DIR}/gradlew_utils"
+
 if [ ! -z "${RELEASE_VERSION}" ]; then
-  ${PARENT_DIR}/gradlew --info -Prelease.useAutomaticVersion=true -Prelease.newVersion=${RELEASE_VERSION} :updateVersion :commitNewVersion
+  gradlewExec --info -Prelease.useAutomaticVersion=true -Prelease.newVersion=${RELEASE_VERSION} :updateVersion :commitNewVersion
 fi
 
-exec ${PARENT_DIR}/gradlew --info -Prelease.useAutomaticVersion=true release "$@"
+gradlewExec --info -Prelease.useAutomaticVersion=true release "$@"

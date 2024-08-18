@@ -3,34 +3,37 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 PARENT_DIR="$(dirname "$SCRIPT_DIR")"
 
-if [ -z "$GPG_KEY_FINGERPRINT" ]; then
-GPG_KEY_FINGERPRINT=$1
-shift
+if [ -z "GPG_SIGNING_KEY" ]; then
 
-if [ "${#GPG_KEY_FINGERPRINT}" -ne 40 ] || ! [[ $GPG_KEY_FINGERPRINT =~ ^[0-9A-Fa-f]{1,}$ ]]; then
-  echo "First arg must be the 40 character key fingerprint."
-  exit 1
-fi
-fi
+  if [ -z "$GPG_KEY_FINGERPRINT" ]; then
+    GPG_KEY_FINGERPRINT=$1
+    shift
 
-
-if [ -z "${GPG_SIGNING_PASSPHRASE}" ]; then
-  echo -n "Enter passphrase: "
-  unset GPG_SIGNING_PASSPHRASE
-  while IFS= read -r -s -n1 pass; do
-    if [[ -z $pass ]]; then
-       echo
-       break
-    else
-       echo -n '*'
-       GPG_SIGNING_PASSPHRASE+=$pass
+    if [ "${#GPG_KEY_FINGERPRINT}" -ne 40 ] || ! [[ $GPG_KEY_FINGERPRINT =~ ^[0-9A-Fa-f]{1,}$ ]]; then
+      echo "First arg must be the 40 character key fingerprint, but was '${GPG_KEY_FINGERPRINT}'"
+      exit 1
     fi
-  done
-  export GPG_SIGNING_PASSPHRASE
+  fi
+
+  if [ -z "GPG_SIGNING_PASSPHRASE" ]; then
+    echo -n "Enter passphrase: "
+    unset GPG_SIGNING_PASSPHRASE
+    while IFS= read -r -s -n1 pass; do
+      if [[ -z $pass ]]; then
+         echo
+         break
+      else
+         echo -n '*'
+         GPG_SIGNING_PASSPHRASE+=$pass
+      fi
+    done
+    export GPG_SIGNING_PASSPHRASE
+
+
+  GPG_SIGNING_KEY=$(echo ${GPG_SIGNING_PASSPHRASE} |gpg --pinentry-mode=loopback --passphrase-fd 0 -a --export-secret-keys $GPG_KEY_FINGERPRINT)
+  export GPG_SIGNING_KEY
+  fi
 fi
 
-GPG_SIGNING_KEY=$(echo ${GPG_SIGNING_PASSPHRASE} |gpg --pinentry-mode=loopback --passphrase-fd 0 -a --export-secret-keys $GPG_KEY_FINGERPRINT)
-export GPG_SIGNING_KEY
-
-
-exec ${PARENT_DIR}/gradlew "$@"
+source "${SCRIPT_DIR}/gradlew_utils"
+gradlewExec "$@"

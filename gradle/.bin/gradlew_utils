@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+function findGradlewPath() {
+  local parent_dir="$(dirname "$SCRIPT_DIR")"
+  local gradlew_path="$(git rev-parse --show-toplevel)/gradlew"
+
+  if [ -f "${gradlew_path}" ]; then
+    echo "${gradlew_path}"
+    return
+  fi
+
+  echo ""
+}
+
+function gradlewExec(){
+  local gradlew="$(findGradlewPath)"
+
+  if ! [ -f "${gradlew}" ]; then
+    >&2 echo "Gradle Wrapper not found!"
+    exit 1
+  fi
+
+  if [ -x "${gradlew}" ]; then
+    exec "${gradlew}" $@
+  fi
+
+  >&2 echo "Gradle Wrapper is not executable: ${gradlew}"
+  exit 1
+}
