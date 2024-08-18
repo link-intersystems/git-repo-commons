@@ -28,7 +28,7 @@ function applyProjectFacet() {
   echo "Fetching refs/remotes/${repo}/${projectFacet}/*"
   git fetch ${repo} +refs/heads/${projectFacet}/*:refs/remotes/${repo}/${projectFacet}/*
 
-  source <(curl -s https://raw.githubusercontent.com/link-intersystems/git-repo-commons/main/${projectFacet}/.bin/git_utils)
+  source <(curl -H 'Cache-Control: no-cache, no-store' -s https://raw.githubusercontent.com/link-intersystems/git-repo-commons/main/${projectFacet}/.bin/git_utils)
 
   updateSubtree "${repo}" "${projectFacet}" ".bin"
   updateSubtree "${repo}" "${projectFacet}" ".github"

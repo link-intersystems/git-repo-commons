@@ -19,7 +19,7 @@ The scripts and config files can either be used by just copy and paste them or b
 In the root directory of the repository you wish to apply the scripts and workflows execute the following line:
 
 ```shell
-curl -sSL https://raw.githubusercontent.com/link-intersystems/git-repo-commons/main/apply-project-facet.sh | bash -s -- gradle
+curl -H 'Cache-Control: no-cache, no-store' -sSL https://raw.githubusercontent.com/link-intersystems/git-repo-commons/main/apply-project-facet.sh | bash -s -- gradle
 ```
 
 This will download the [apply-project-facet.sh](apply-project-facet.sh) and immediately execute it. The option `gradle` tells the
