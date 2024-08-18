@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+function onGitRootDir() {
+  pushd "$(pwd)" > /dev/null
+  cd "$(git rev-parse --show-toplevel)"
+  local command=$1
+  shift
+  $command $*
+  popd > /dev/null
+}
+
+
+function updateSubtree(){
+  local repo=$1
+  local projectFacet=$2
+  local subtree=$3
+  local existingSubtrees=$(git log | grep git-subtree-dir | tr -d ' ' | cut -d ":" -f2 | sort | uniq | xargs -I {} bash -c 'if [ -d $(git rev-parse --show-toplevel)/{} ] ; then echo {}; fi')
+  local subtreeBranchQualifier="${subtree#\.}"
+
+  if [[ ${existingSubtrees} =~ ${subtree} ]]; then
+    git subtree -P "${subtree}" pull --squash "${repo}/${projectFacet}/${subtreeBranchQualifier}"
+  else
+    local subtreeBranchQualifier="${subtree#\.}"
+    git subtree -P "${subtree}" add --squash "${repo}/${projectFacet}/${subtreeBranchQualifier}"
+  fi
+}

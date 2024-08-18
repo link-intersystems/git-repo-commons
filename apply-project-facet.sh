@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 main() {
-  onGitRootDir applyProjectFacet "git-repo-commons" "${1:-gradle}"
+  local projectFacet="${1:-gradle}"
+  onGitRootDir applyProjectFacet "git-repo-commons" "${projectFacet}"
 }
 
 function onGitRootDir() {
@@ -27,18 +28,11 @@ function applyProjectFacet() {
   echo "Fetching refs/remotes/${repo}/${projectFacet}/*"
   git fetch ${repo} +refs/heads/${projectFacet}/*:refs/remotes/${repo}/${projectFacet}/*
 
-  addSubtree ".bin"
-  addSubtree ".github"
+  source <(curl -s https://raw.githubusercontent.com/link-intersystems/git-repo-commons/main/${projectFacet}/.bin/git_utils)
+
+  updateSubtree "${repo}" "${projectFacet}" ".bin"
+  updateSubtree "${repo}" "${projectFacet}" ".github"
 }
 
-function addSubtree(){
-  local subtree=$1
-  local existingSubtrees=$(git log | grep git-subtree-dir | tr -d ' ' | cut -d ":" -f2 | sort | uniq | xargs -I {} bash -c 'if [ -d $(git rev-parse --show-toplevel)/{} ] ; then echo {}; fi')
-
-  if [[ ! ${existingSubtrees} =~ ${subtree} ]]; then
-    local subtreeBranchQualifier="${subtree#\.}"
-    git subtree -P "${subtree}" add --squash "${repo}/${projectFacet}/${subtreeBranchQualifier}"
-  fi
-}
 
 main "$@"; exit

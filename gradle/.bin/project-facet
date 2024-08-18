@@ -1,13 +1,23 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-PARENT_DIR="$(dirname "$SCRIPT_DIR")"
+source "{SCRIPT_DIR}/git_utils"
 
+function main(){
+  local cmd="$1"
+  case "${cmd}" in
+    update)
+          onGitRootDir updateSubtrees
+      ;;
+    *)
+      echo "Usage: $0 update"
+      ;;
+  esac
+}
 
-pushd $(pwd)
-cd ${PARENT_DIR}
+function updateSubtrees() {
+  updateSubtree git-repo-commons gradle .bin
+  updateSubtree git-repo-commons gradle .github
+}
 
-git subtree -P .bin pull --squash git-repo-commons gradle/bin
-git subtree -P .github pull --squash git-repo-commons gradle/github
-
-popd
+main "$@"; exit
