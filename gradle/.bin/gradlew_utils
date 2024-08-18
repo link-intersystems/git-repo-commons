@@ -23,7 +23,8 @@ function gradlewExec(){
   fi
 
   if [ -x "${gradlew}" ]; then
-    exec "${gradlew}" $@
+    "${gradlew}" $@
+    retrun
   fi
 
   >&2 echo "Gradle Wrapper is not executable: ${gradlew}"
