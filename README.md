@@ -14,6 +14,18 @@ The scripts and config files can either be used by just copy and paste them or b
 > 
 > But you can also study this repository and build a similar one for your own organization.
 
+## Apply default scripts and workflow configuration
+
+In the root directory of the repository you wish to apply the scripts and workflows execute the following line:
+
+```shell
+curl -sSL https://raw.githubusercontent.com/link-intersystems/git-repo-commons/main/apply-project-facet.sh | bash -s -- gradle
+```
+
+This will download the [apply-project-facet.sh](apply-project-facet.sh) and immediately execute it. The option `gradle` tells the
+init script to apply the configuration under the [gradle](gradle) directory of this repository.
+
+
 ## Gradle Project Commons
 
 The gradle project commons are located under the [gradle](gradle) directory.
@@ -87,13 +99,3 @@ plugins {
 }
 ```
 
-## Apply default scripts and workflow configuration
-
-In the root directory of the repository you wish to add the scripts and workflows execute the following line:
-
-```shell
-curl -sSL https://raw.githubusercontent.com/link-intersystems/git-repo-commons/main/init.sh | bash -s -- gradle
-```
-
-This will download the [init.sh](init.sh) and immediately execute it. The option `gradle` tells the
-init script to apply the configuration under the [gradle](gradle) directory of this repository.
