@@ -31,9 +31,4 @@ jobs:
       - name: Update Subtree Branches
         run: |
           ./updateSubtreeBranches.sh
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.PUSH_TOKEN }}
-          branch: "refs/heads/gradle/*"
+          git push --all
