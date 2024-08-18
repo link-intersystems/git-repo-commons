@@ -31,4 +31,5 @@ jobs:
       - name: Update Subtree Branches
         run: |
           ./updateSubtreeBranches.sh
+          git remote set-url origin https://${{ secrets.PUSH_TOKEN }}@github.com/link-intersystems/git-repo-commons.git
           git push --all
