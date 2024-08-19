@@ -20,9 +20,9 @@ function updateSubtree(){
   local subtreeBranchQualifier="${subtree#\.}"
 
   if [[ ${existingSubtrees} =~ ${subtree} ]]; then
-    git subtree -P "${subtree}" pull "${repo}" "${projectFacet}/${subtreeBranchQualifier}"
+    git subtree -P "${subtree}" pull --squash "${repo}" "${projectFacet}/${subtreeBranchQualifier}"
   else
     local subtreeBranchQualifier="${subtree#\.}"
-    git subtree -P "${subtree}" add "${repo}/${projectFacet}/${subtreeBranchQualifier}"
+    git subtree -P "${subtree}" add --squash "${repo}/${projectFacet}/${subtreeBranchQualifier}"
   fi
 }

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 main() {
   local projectFacet="${1:-gradle}"
   onGitRootDir applyProjectFacet "git-repo-commons" "${projectFacet}"
@@ -12,6 +14,21 @@ function onGitRootDir() {
   shift
   $command $*
   popd > /dev/null
+}
+
+function updateSubtree(){
+  local repo=$1
+  local projectFacet=$2
+  local subtree=$3
+  local existingSubtrees=$(git log | grep git-subtree-dir | tr -d ' ' | cut -d ":" -f2 | sort | uniq | xargs -I {} bash -c 'if [ -d $(git rev-parse --show-toplevel)/{} ] ; then echo {}; fi')
+  local subtreeBranchQualifier="${subtree#\.}"
+
+  if [[ ${existingSubtrees} =~ ${subtree} ]]; then
+    git subtree -P "${subtree}" pull --squash "${repo}" "${projectFacet}/${subtreeBranchQualifier}"
+  else
+    local subtreeBranchQualifier="${subtree#\.}"
+    git subtree -P "${subtree}" add --squash "${repo}/${projectFacet}/${subtreeBranchQualifier}"
+  fi
 }
 
 function applyProjectFacet() {
@@ -27,8 +44,6 @@ function applyProjectFacet() {
 
   echo "Fetching refs/remotes/${repo}/${projectFacet}/*"
   git fetch ${repo} +refs/heads/${projectFacet}/*:refs/remotes/${repo}/${projectFacet}/*
-
-  source <(curl -H 'Cache-Control: no-cache, no-store' -s https://raw.githubusercontent.com/link-intersystems/git-repo-commons/main/${projectFacet}/.bin/git_utils)
 
   updateSubtree "${repo}" "${projectFacet}" ".bin"
   updateSubtree "${repo}" "${projectFacet}" ".github"
