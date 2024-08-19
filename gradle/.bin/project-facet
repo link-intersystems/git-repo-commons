@@ -1,24 +1,21 @@
 #!/usr/bin/env bash
 
-if ! [[ $(type -t onGitRootDir) == function ]]; then
-  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-  source "${SCRIPT_DIR}/git_utils"
-fi
-
-
 REPO_NAME="git-repository-commons"
 
 function main(){
   local cmd="$1"
   shift
+  local projectFacet="$2"
+
+  importGitUtils "${projectFacet}"
 
   case "${cmd}" in
     update)
-          onGitRootDir update "$@"
+          onGitRootDir update "${projectFacet}"
       ;;
     install)
-          onGitRootDir installProjectFacet "$@"
-          onGitRootDir update "$@"
+          onGitRootDir installProjectFacet "${projectFacet}"
+          onGitRootDir update "${projectFacet}"
       ;;
     *)
       echo "Usage: $0 {install|update}"
@@ -50,5 +47,23 @@ function install() {
   echo "Fetching refs/remotes/${repo}/${projectFacet}/*"
   git fetch ${repo} +refs/heads/${projectFacet}/*:refs/remotes/${repo}/${projectFacet}/*
 }
+
+
+function importGitUtils(){
+  local script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+  if [ -f "${script_dir}/git_utils" ]; then
+    source "${script_dir}/git_utils"
+  else
+    # Use git_utils from repository
+    local projectFacet="$1"
+
+    local binHead=$(git fetch --porcelain  https://github.com/link-intersystems/git-repo-commons.git ${projectFacet}/bin | awk '{ print $3 }')
+    local gitUtilsObjectId=$(git ls-tree ${binHead} git_utils | awk '{ print $3 }')
+
+    source <(git cat-file -p ${gitUtilsObjectId})
+  fi
+}
+
 
 main "$@"; exit
