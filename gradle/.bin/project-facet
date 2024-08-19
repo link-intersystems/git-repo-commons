@@ -1,23 +1,54 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-source "${SCRIPT_DIR}/git_utils"
+if ! [[ $(type -t onGitRootDir) == function ]]; then
+  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+  source "${SCRIPT_DIR}/git_utils"
+fi
+
+
+REPO_NAME="git-repository-commons"
 
 function main(){
   local cmd="$1"
+  shift
+
   case "${cmd}" in
     update)
-          onGitRootDir updateSubtrees
+          onGitRootDir update "$@"
+      ;;
+    install)
+          onGitRootDir installProjectFacet "$@"
+          onGitRootDir update "$@"
       ;;
     *)
-      echo "Usage: $0 update"
+      echo "Usage: $0 {install|update}"
       ;;
   esac
 }
 
-function updateSubtrees() {
-  updateSubtree git-repo-commons gradle .bin
-  updateSubtree git-repo-commons gradle .github
+function update() {
+  local repo="${REPO_NAME}"
+  local projectFacet="$1"
+
+  echo "Update project facet ${projectFacet}"
+
+  updateSubtree ${repo} ${projectFacet} .bin
+  updateSubtree ${repo} ${projectFacet} .github
+}
+
+function install() {
+  local repo="${REPO_NAME}"
+  local projectFacet="$1"
+
+  echo "Install project facet ${projectFacet}"
+
+  if [ -z "$(git remote | grep "${repo}")" ]; then
+    echo "Adding Repository ${repo}"
+    git remote add ${repo} https://github.com/link-intersystems/${repo}.git
+  fi
+
+  echo "Fetching refs/remotes/${repo}/${projectFacet}/*"
+  git fetch ${repo} +refs/heads/${projectFacet}/*:refs/remotes/${repo}/${projectFacet}/*
 }
 
 main "$@"; exit
