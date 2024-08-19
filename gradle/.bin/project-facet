@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
+
 REPO_NAME="git-repository-commons"
+
 
 function main(){
   local cmd="$1"
@@ -22,15 +24,19 @@ function main(){
   esac
 }
 
+
 function update() {
   local repo="${REPO_NAME}"
   local projectFacet="$1"
 
   echo "Update project facet ${projectFacet}"
 
+  ensureGitRemote
+
   updateSubtree ${repo} ${projectFacet} .bin
   updateSubtree ${repo} ${projectFacet} .github
 }
+
 
 function install() {
   local repo="${REPO_NAME}"
@@ -38,13 +44,20 @@ function install() {
 
   echo "Install project facet ${projectFacet}"
 
-  if [ -z "$(git remote | grep "${repo}")" ]; then
-    echo "Adding Repository ${repo}"
-    git remote add ${repo} https://github.com/link-intersystems/${repo}.git
-  fi
+  ensureGitRemote
 
   echo "Fetching refs/remotes/${repo}/${projectFacet}/*"
   git fetch ${repo} +refs/heads/${projectFacet}/*:refs/remotes/${repo}/${projectFacet}/*
+}
+
+
+function ensureGitRemote() {
+    local repo="${REPO_NAME}"
+
+    if [ -z "$(git remote | grep "${repo}")" ]; then
+      echo "Adding Repository ${repo}"
+      git remote add ${repo} https://github.com/link-intersystems/${repo}.git
+    fi
 }
 
 
