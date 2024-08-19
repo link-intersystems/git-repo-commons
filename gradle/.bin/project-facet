@@ -4,7 +4,6 @@ REPO_NAME="git-repository-commons"
 
 function main(){
   local cmd="$1"
-  shift
   local projectFacet="$2"
 
   importGitUtils "${projectFacet}"
@@ -58,7 +57,7 @@ function importGitUtils(){
     # Use git_utils from repository
     local projectFacet="$1"
 
-    local binHead=$(git fetch --porcelain  https://github.com/link-intersystems/git-repo-commons.git ${projectFacet}/bin | awk '{ print $3 }')
+    local binHead=$(git fetch --porcelain https://github.com/link-intersystems/git-repo-commons.git ${projectFacet}/bin | awk '{ print $3 }')
     local gitUtilsObjectId=$(git ls-tree ${binHead} git_utils | awk '{ print $3 }')
 
     source <(git cat-file -p ${gitUtilsObjectId})
