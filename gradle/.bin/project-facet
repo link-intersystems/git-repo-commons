@@ -8,6 +8,11 @@ function main(){
   local cmd="$1"
   local projectFacet="$2"
 
+  if [ -z "${cmd}" ] || [ -z "${projectFacet}" ]; then
+    usage
+    exit 1
+  fi
+
   importGitUtils "${projectFacet}"
 
   case "${cmd}" in
@@ -19,9 +24,17 @@ function main(){
           onGitRootDir update "${projectFacet}"
       ;;
     *)
-      echo "Usage: $0 {install|update}"
+      usage
+      exit 1
       ;;
   esac
+}
+
+
+function usage(){
+    echo "Usage: $0 {install|update} <project_facet>"
+    echo
+    echo -e "   project_facet = The facet to apply to the current repository. E.g. gradle."
 }
 
 
