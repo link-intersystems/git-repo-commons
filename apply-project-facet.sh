@@ -15,7 +15,8 @@ function installProjectFacet() {
   local projectFacet="$1"
 
   importGitBinScript "${projectFacet}" git_utils
-  local projectFacetScriptId=$(git ls-tree $https://github.com/link-intersystems/git-repo-commons.git ${projectFacet}/bin project-facet | awk '{ print $3 }')
+  local binHead=$(git fetch --porcelain  https://github.com/link-intersystems/git-repo-commons.git ${projectFacet}/bin | awk '{ print $3 }')
+  local projectFacetScriptId=$(git ls-tree ${binHead} project-facet | awk '{ print $3 }')
 
   cat <(git cat-file -p ${projectFacetScriptId}) | bash -s -- install "${projectFacet}"
 }
