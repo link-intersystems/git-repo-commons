@@ -41,7 +41,7 @@ function runTests(){
           local beforeEachResult=""
 
           if [[ ! -z "${beforeEachFn}" ]]; then
-              log "beforeEach"
+              log warn "beforeEach"
               beforeEachResult=$($beforeEachFn)
           fi
 
@@ -49,10 +49,12 @@ function runTests(){
             cd "$beforeEachResult"
           fi
 
+          log warn "Executing $test"
           (${test} log "$beforeEachResult")
           local exitCode=$?
 
           if [[ ! -z "${afterEachFn}" ]]; then
+             log warn "afterEach"
               ${afterEachFn} log $beforeEachResult
           fi
 
