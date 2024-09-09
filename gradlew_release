@@ -3,6 +3,8 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 PARENT_DIR="$(dirname "$SCRIPT_DIR")"
 
+. ${SCRIPT_DIR}/gradlew_utils
+
 RELEASE_STRATEGY="patch"
 
 if [ ! -z "$1" ]; then
@@ -15,7 +17,7 @@ function printHelp(){
 }
 
 function currentVersion() {
-  echo $(${SCRIPT_DIR}/gradlew properties -q | awk '/^version:/ {print $2}')
+  echo $(gradlewExec properties -q | awk '/^version:/ {print $2}'))
 }
 
 increment_version() {
