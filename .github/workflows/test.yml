@@ -1,4 +1,4 @@
-name: Update Subtree Branches
+name: Tests
 
 on:
   push:
