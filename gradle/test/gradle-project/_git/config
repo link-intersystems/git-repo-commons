@@ -5,3 +5,4 @@
 	symlinks = false
 	ignorecase = true
 	logallrefupdates = true
+	worktree = D:/repos/git/github/link-intersystems/git-repository-commons/gradle/test/gradle-project
