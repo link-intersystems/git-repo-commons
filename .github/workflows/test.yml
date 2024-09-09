@@ -5,6 +5,7 @@ on:
     paths:
       - "gradle/**"
       - ".github/**"
+      - "**/runTests"
     branches:
       - "feature/**"
   pull_request:
