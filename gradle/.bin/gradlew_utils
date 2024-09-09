@@ -3,22 +3,21 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 function findGradlewPath() {
-  local parent_dir="$(dirname "$SCRIPT_DIR")"
-  local gradlew_path="$(git rev-parse --show-toplevel)/gradlew"
-
-  if [ -f "${gradlew_path}" ]; then
-    echo "${gradlew_path}"
-    return
+  local rootDir="$(dirname "$SCRIPT_DIR")"
+  local gradleWorkdir="$(git rev-parse --show-toplevel)"
+  if [ $? == 0 ]; then
+      rootDir="${gradleWorkdir}"
   fi
+  local gradlew_path="${rootDir}/gradlew"
 
-  echo ""
+  echo "${gradlew_path}"
 }
 
 function gradlewExec(){
   local gradlew="$(findGradlewPath)"
 
   if ! [ -f "${gradlew}" ]; then
-    >&2 echo "Gradle Wrapper not found!"
+    >&2 echo "Gradle Wrapper not found: ${gradlew}"
     exit 1
   fi
 

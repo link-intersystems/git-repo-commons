@@ -5,9 +5,8 @@ on:
     paths:
       - "gradle/**"
       - ".github/**"
-      - "updateSubtreeBranches.sh"
     branches:
-      - "main"
+      - "feature/**"
   pull_request:
     branches: [ "main" ]
 
@@ -23,13 +22,6 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Configure Git User
+      - name: Run Tests
         run: |
-          git config user.name github-actions[bot]
-          git config user.email github-actions[bot]@users.noreply.github.com
-
-      - name: Update Subtree Branches
-        env:
-          PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-        run: |
-          ./updateSubtreeBranches.sh
+          ./runTests

@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+function main() {
+  clean
+
+  beforeTestGradleExec
+  (GIT_DIR="${SCRIPT_DIR}/build/tests/gradle-project/_git" testGradlewExec) # run isolated
+  afterTestGradleExec
+}
+
+function assertSuccess() {
+  if [ $? != 0 ]; then
+    >&2 echo "Process not finished successfully: $1"
+  fi
+}
+
+function clean(){
+  if [ -d "${SCRIPT_DIR}/build/tests/gradle-project" ]; then
+    rm -rf "${SCRIPT_DIR}/build/tests/gradle-project" > /dev/null
+  fi
+}
+
+function beforeTestGradleExec(){
+  if [ ! -d "${SCRIPT_DIR}/build/tests" ]; then mkdir "${SCRIPT_DIR}/build/tests" > /dev/null; fi
+
+  cp -r "${SCRIPT_DIR}/gradle-project" "${SCRIPT_DIR}/build/tests/gradle-project" > /dev/null
+  cp -r "${SCRIPT_DIR}/../.bin" "${SCRIPT_DIR}/build/tests/gradle-project/.bin" > /dev/null
+
+  pushd "$(pwd)" 2>&1 > /dev/null
+
+  cd "${SCRIPT_DIR}/build/tests/gradle-project" > /dev/null
+}
+
+function afterTestGradleExec(){
+  popd 2>&1 > /dev/null
+}
+
+function testGradlewExec(){
+  echo $(pwd)
+  . .bin/gradlew_utils
+  gradlewExec projects
+  assertSuccess "gradlewExec"
+}
+
+main "@*"
