@@ -23,8 +23,6 @@ function clean(){
 }
 
 function beforeTestGradleExec(){
-  if [ ! -d "${SCRIPT_DIR}/build/tests" ]; then mkdir "${SCRIPT_DIR}/build/tests" > /dev/null; fi
-
   cp -r "${SCRIPT_DIR}/gradle-project" "${SCRIPT_DIR}/build/tests/gradle-project" > /dev/null
   cp -r "${SCRIPT_DIR}/../.bin" "${SCRIPT_DIR}/build/tests/gradle-project/.bin" > /dev/null
 
