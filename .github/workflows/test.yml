@@ -1,0 +1,28 @@
+name: Tests
+
+on:
+  push:
+    paths:
+      - "gradle/**"
+      - ".github/**"
+      - "**/runTests"
+    branches:
+      - "feature/**"
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Run Tests
+        run: |
+          ./runTests

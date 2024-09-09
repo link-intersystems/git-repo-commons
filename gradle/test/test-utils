@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+fn_exists() { declare -F "$1" > /dev/null; }
+
+fn_exists "log" || function log(){
+  local level=$1
+  shift
+
+  case "$level" in
+    failed|error|success|ok|warn) echo "$@";;
+    *) echo "$level" "$@";;
+  esac
+}
+
+function assertSuccess(){
+    local cmd="$1"
+    shift
+
+    ("${cmd}" "$@")
+    local exitCode=$?
+    if [ $exitCode != 0 ]; then
+       log error "'$cmd" "$@' exit code was $exitCode, but expected 0."
+       exit 1
+    fi
+}
+
+function assertFail(){
+    local cmd="$1"
+    shift
+
+    ("${cmd}" "$@")
+    local exitCode=$?
+    if [ $exitCode == 0 ]; then
+        log error "'$cmd" "$@' exit code was $exitCode, but expected anything else then 0."
+        exit 1
+    fi
+}
+
+function abbreviate(){
+  local str="${1}"
+  local length="${2-50}"
+  local truncatedStr="${str:0:$length}"
+  local restStr="${str:$length:3}"
+
+  if [ ${#restStr} != 0 ]; then
+    restStr="..."
+  fi
+
+  echo "${truncatedStr}${restStr}"
+}
+
+
+function assertContains(){
+  local str="$1"
+  local searchStr="$2"
+
+
+  if [[ $str != *"$searchStr"* ]]; then
+    local stringName="$3"
+    if [ -z "$stringName" ]; then
+       stringName="'$(abbreviate "$str" 50)'"
+    fi
+    log error "$stringName does not contain: $searchStr"
+    exit 1
+  fi
+}
+
+function assertEquals(){
+  local expected="$1"
+  local actual="$2"
+  local description="$3"
+  if [ ! -z "$description" ]; then
+    description="$description: "
+  fi
+
+  if [ "$actual" != "$expected" ]; then
+    log error "${description}expected '$expected', but was '$actual'"
+    exit 1
+  fi
+}

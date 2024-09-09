@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+function testGradlewExec(){
+  local log=$1
+
+  export GIT_DIR="$(pwd)/_git"
+  export GIT_WORK_TREE="$(pwd)"
+
+  . .bin/gradlew_utils
+
+  local result=$(assertSuccess "gradlewExec" "projects")
+  $log "$result"
+  assertContains "$result" "BUILD SUCCESSFUL" "OUTPUT"
+}
+
+function testCurrentVersion(){
+  local log=$1
+  export GIT_DIR="$(pwd)/_git"
+  export GIT_WORK_TREE="$(pwd)"
+
+  . .bin/gradlew_utils
+
+  local result="$(currentVersion)"
+  $log "$result"
+  assertContains "$result" "1.2.3"
+}
+
+function testIncrementMajorVersion(){
+  local log=$1
+
+  . .bin/gradlew_utils
+
+  local version=$(increment_version "1.2.3" 0)
+  assertEquals "2.0.0" "$version" "increment major version"
+}
+
+function testIncrementMinorVersion(){
+  local log=$1
+
+  . .bin/gradlew_utils
+
+  local version=$(increment_version "1.2.3" 1)
+  assertEquals "1.3.0" "$version" "increment minor version"
+}
+
+function testIncrementPatchVersion(){
+  local log=$1
+
+  . .bin/gradlew_utils
+
+  local version=$(increment_version "1.2.3" 2)
+  assertEquals "1.2.4" "$version" "increment minor version"
+}
+
+function beforeEach(){
+  if [ -d "build/tests/gradle-project" ]; then
+    rm -rf "build/tests/gradle-project" > /dev/null
+  fi
+
+  if [ ! -d "tests/gradle-project" ]; then
+    mkdir -p "build/tests/gradle-project" > /dev/null
+  fi
+
+  cp -r "gradle-project" "build/tests" > /dev/null
+  cp -r "../.bin" "build/tests/gradle-project/.bin" > /dev/null
+
+  echo "build/tests/gradle-project"
+}

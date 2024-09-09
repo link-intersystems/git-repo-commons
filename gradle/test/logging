@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+Color_Off='\033[0m'
+
+Black='\033[0;30m'        # Black
+Red='\033[0;31m'          # Red
+Green='\033[0;32m'        # Green
+Yellow='\033[0;33m'       # Yellow
+Blue='\033[0;34m'         # Blue
+Purple='\033[0;35m'       # Purple
+Cyan='\033[0;36m'         # Cyan
+White='\033[0;37m'        # White
+
+function printColored(){
+  local color=${2-${Color_Off}}
+  printf "${color}${1}${Color_Off}"
+}
+
+function printError(){
+  printColored "$1" "$Red"
+}
+
+function printWarn(){
+  printColored "$1" "$Yellow"
+}
+
+function printSuccess(){
+  printColored "$1" "$Green"
+}
+
+function logInfo(){
+  echo -e "$1"
+}
+
+function logError(){
+  printError "$1\n"
+}
+
+function logWarn(){
+  printWarn "$1\n"
+}
+
+function logSuccess(){
+  printSuccess "$1\n"
+}
