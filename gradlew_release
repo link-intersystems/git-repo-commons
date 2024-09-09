@@ -20,6 +20,7 @@ shopt -s extglob
 case "$RELEASE_STRATEGY" in
       "--help" | "-?" )
         printHelp
+        exit 0
       ;;
       "patch" )
         # Nothing to do
@@ -37,6 +38,7 @@ case "$RELEASE_STRATEGY" in
       ;;
       *)
         printHelp
+        exit 0
       ;;
 esac
 
