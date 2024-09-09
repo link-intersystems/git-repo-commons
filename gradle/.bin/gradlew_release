@@ -16,23 +16,6 @@ function printHelp(){
    >&2 echo "Usage: $(basename "$0") [patch|minor|major]"
 }
 
-function currentVersion() {
-  echo $(gradlewExec properties -q | awk '/^version:/ {print $2}'))
-}
-
-increment_version() {
-  local delimiter=.
-  local array=($(echo "$1" | tr $delimiter '\n'))
-  array[$2]=$((array[$2]+1))
-
-  for (( j=$(($2+1)); j<${#array[@]}; j++ ));
-  do
-    array[$j]=0
-  done
-
-  echo $(local IFS=$delimiter ; echo "${array[*]}")
-}
-
 shopt -s extglob
 case "$RELEASE_STRATEGY" in
       "--help" | "-?" )
