@@ -7,12 +7,31 @@ function main() {
 
   beforeTestGradleExec
   (GIT_DIR="${SCRIPT_DIR}/build/tests/gradle-project/_git"; GIT_WORK_TREE="${SCRIPT_DIR}/build/tests/gradle-project" testGradlewExec) # run isolated
+  local exitCode=$?
   afterTestGradleExec
+
+  if [ $exitCode != 0 ]; then
+    echo "TESTS FAILED"
+    exit $exitCode;
+  else
+    echo "TESTS SUCCESSFUL"
+  fi
 }
 
 function assertSuccess() {
   if [ $? != 0 ]; then
     >&2 echo "Process not finished successfully: $1"
+    exit 1
+  fi
+}
+
+function assertContains(){
+  local str="$1"
+  local searchStr="$2"
+
+  if [[ $str != *"$searchStr"* ]]; then
+    >&2 echo "Does not contain: $searchStr"
+    exit 1
   fi
 }
 
@@ -38,8 +57,10 @@ function afterTestGradleExec(){
 function testGradlewExec(){
   echo $(pwd)
   . .bin/gradlew_utils
-  gradlewExec projects
+  local result="$(gradlewExec projects)"
+  echo "$result" | sed -e 's/^/[GRADLEW] /'
   assertSuccess "gradlewExec"
+  assertContains "$result" "BUILD SUCCESSFUL"
 }
 
 main "@*"
