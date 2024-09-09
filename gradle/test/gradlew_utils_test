@@ -54,6 +54,15 @@ function testIncrementPatchVersion(){
   assertEquals "1.2.4" "$version" "increment minor version"
 }
 
+function testGradlewRelease(){
+  local log=$1
+
+  export GIT_DIR="$(pwd)/_git"
+  export GIT_WORK_TREE="$(pwd)"
+
+  assertSuccess ./.bin/gradlew_release patch
+}
+
 function beforeEach(){
   if [ -d "build/tests/gradle-project" ]; then
     rm -rf "build/tests/gradle-project" > /dev/null
