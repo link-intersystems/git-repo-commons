@@ -6,7 +6,7 @@ function main() {
   clean
 
   beforeTestGradleExec
-  (GIT_DIR="${SCRIPT_DIR}/build/tests/gradle-project/_git" testGradlewExec) # run isolated
+  (GIT_DIR="${SCRIPT_DIR}/build/tests/gradle-project/_git"; GIT_WORK_TREE="${SCRIPT_DIR}/build/tests/gradle-project" testGradlewExec) # run isolated
   afterTestGradleExec
 }
 
