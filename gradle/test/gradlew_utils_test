@@ -18,6 +18,14 @@ function testCurrentVersion(){
   assertContains "$result" "1.2.3"
 }
 
+function testIncrementSnapshotVersion(){
+  . .bin/gradlew_utils
+
+  local version=$(increment_version "1.2.3-SNAPSHOT" 2)
+  log "incremented version ${version}"
+  assertEquals "1.2.4-SNAPSHOT" "$version" "increment snapshot version"
+}
+
 function testIncrementMajorVersion(){
   . .bin/gradlew_utils
 

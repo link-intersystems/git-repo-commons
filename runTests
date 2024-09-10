@@ -12,7 +12,7 @@ function main() {
   (
     readarray -t -d '' testFilesArray < <(xargs printf '%s\0' <<<"$testFiles")
     . "${SCRIPT_DIR}/testing/test-runner"
-    runTests "${testFilesArray[@]}"
+    runTests ${testFilesArray[@]}
   )
 }
 
