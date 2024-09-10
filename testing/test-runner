@@ -27,7 +27,7 @@ function runTests(){
       local afterEachFn=$(listAfterEach "$testScript")
 
 
-      echo "$testFunctions" | while read test; do
+      while read test; do
         function log(){
           local level=$1
           shift
@@ -61,7 +61,9 @@ function runTests(){
                 ${afterEachFn} "${buildDir}" "${beforeEachResult}"
             fi
 
-            if [ $exitCode != 0 ]; then exit $exitCode; fi
+            if [ $exitCode != 0 ]; then
+              exit $exitCode
+            fi
         )
         local exitCode=$?
         if [ $exitCode != 0 ]; then
@@ -70,7 +72,7 @@ function runTests(){
         else
           log success "TEST SUCCESSFUL"
         fi
-      done
+      done <<< "$testFunctions"
 
     done
 }
