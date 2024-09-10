@@ -20,6 +20,7 @@ shopt -s extglob
 case "$RELEASE_STRATEGY" in
       "--help" | "-?" )
         printHelp
+        exit 0
       ;;
       "patch" )
         # Nothing to do
@@ -37,6 +38,7 @@ case "$RELEASE_STRATEGY" in
       ;;
       *)
         printHelp
+        exit 0
       ;;
 esac
 
@@ -45,8 +47,8 @@ echo "Executing ${RELEASE_STRATEGY} release"
 source "${SCRIPT_DIR}/gradlew_utils"
 
 if [ ! -z "${RELEASE_VERSION}" ]; then
-  gradlewExec --info -Prelease.useAutomaticVersion=true -Prelease.newVersion=${RELEASE_VERSION} :updateVersion :commitNewVersion
-else
-  gradlewExec --info -Prelease.useAutomaticVersion=true release "$@"
+  gradlewExec --info -Prelease.useAutomaticVersion=true -Prelease.newVersion="${RELEASE_VERSION}" :updateVersion :commitNewVersion
 fi
+
+gradlewExec --info -Prelease.useAutomaticVersion=true release "$@"
 

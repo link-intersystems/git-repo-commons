@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+. "$SCRIPT_DIR/logging"
+
+
+function camelToUnderScore(){
+  echo $1 | sed -r 's/([a-z0-9])([A-Z])/\1_\L\2/g'
+}
+
+function toUppercase(){
+  printf '%s\n' "$1" | awk '{ print toupper($0) }'
+}
+
+function runTests(){
+    if [ $# -eq 0 ]; then
+      echo "No tests scripts specified."
+      return
+    fi
+
+    for testScript in "$@"
+    do
+      local testScript=$(realpath "$testScript")
+      local testScriptDir=$(dirname "$testScript")
+      local testScriptName=$(basename "$testScript")
+      local buildDir="${testScriptDir}/.build/tests/${testScriptName}"
+      mkdir -p "${buildDir}"
+
+      local beforeEachFn=$(listBeforeEach "$testScript")
+      local testFunctions=$(listTests "$testScript")
+      local afterEachFn=$(listAfterEach "$testScript")
+
+
+      while read test; do
+        function log(){
+          local level=$1
+          shift
+
+          case "$level" in
+            failed|error) logError "$(echo "$@" | sed -e "s/^/[$test] /")";;
+            success|ok)  logSuccess "$(echo "$@" | sed -e "s/^/[$test] /")";;
+            warn) logWarn "$(echo "$@" | sed -e "s/^/[$test] /")";;
+            *) logInfo "$(echo "$level" "$@" | sed -e "s/^/[$test] /")";;
+          esac
+        }
+
+        (
+            log warn "Executing tests in '$testScript'"
+            . "${SCRIPT_DIR}/test-utils"
+            . "$testScript"
+
+            cd "${testScriptDir}"
+
+            local beforeEachResult=""
+            if [[ ! -z "${beforeEachFn}" ]]; then
+                log warn "${beforeEachFn}"
+                beforeEachResult=$($beforeEachFn "${buildDir}")
+            fi
+
+            executeTest
+            local exitCode=$?
+
+            if [[ ! -z "${afterEachFn}" ]]; then
+               log warn "${afterEachFn}"
+                ${afterEachFn} "${buildDir}" "${beforeEachResult}"
+            fi
+
+            if [ $exitCode != 0 ]; then
+              exit $exitCode
+            fi
+        )
+        local exitCode=$?
+        if [ $exitCode != 0 ]; then
+          log failed "TEST FAILED"
+          exit $exitCode
+        else
+          log success "TEST SUCCESSFUL"
+        fi
+      done <<< "$testFunctions"
+
+    done
+}
+
+function executeTest(){
+   (
+    if [ -d "$beforeEachResult" ]; then
+      cd "$beforeEachResult"
+    fi
+
+    log warn "Executing '$test' in working directory $(pwd)"
+
+    ${test} "${buildDir}" "$beforeEachResult"
+   )
+}
+
+function listBeforeEach(){
+  local testScript="$1"
+  shift
+
+  grep -v -x -f <(declare -F) <(. ${testScript}; declare -F) | cut  -c 12- | grep "^beforeEach$"
+}
+
+function listAfterEach(){
+  local testScript="$1"
+  shift
+
+  grep -v -x -f <(declare -F) <(. ${testScript}; declare -F) | cut  -c 12- | grep "^afterEach$"
+}
+
+function listTests(){
+  local testScript="$1"
+  shift
+
+  grep -v -x -f <(declare -F) <(. ${testScript}; declare -F) | cut  -c 12- | grep "^test"
+}

@@ -1,3 +1,4 @@
-0000000000000000000000000000000000000000 33c5e1109193dda8e1cb2ffe76ee56e90cf28f71 René Link <rene.link@link-intersystems.com> 1725875567 +0200	commit (initial): Test project.
-33c5e1109193dda8e1cb2ffe76ee56e90cf28f71 29551a1b5faaf5e97defabc161595e9765ca7e10 René Link <rene.link@link-intersystems.com> 1725892415 +0200	commit: Added version.
-0000000000000000000000000000000000000000 a7983f884226ed7ef2c92910cb1177ca87538d46 René Link <rene.link@link-intersystems.com> 1725892775 +0200	commit (initial): Acutal state
+0000000000000000000000000000000000000000 d668396b36495e88b9d03169f20315332f8568e6 René Link <rene.link@link-intersystems.com> 1725972238 +0200	commit (initial): initial.
+d668396b36495e88b9d03169f20315332f8568e6 0000000000000000000000000000000000000000 René Link <rene.link@link-intersystems.com> 1725972279 +0200	Branch: renamed refs/heads/master to refs/heads/main
+0000000000000000000000000000000000000000 d668396b36495e88b9d03169f20315332f8568e6 René Link <rene.link@link-intersystems.com> 1725972279 +0200	Branch: renamed refs/heads/master to refs/heads/main
+d668396b36495e88b9d03169f20315332f8568e6 22717aab360413ce41e0b4662a7698baa5d87a30 René Link <rene.link@link-intersystems.com> 1725972330 +0200	commit: Example project.

@@ -2,7 +2,16 @@
 	repositoryformatversion = 0
 	filemode = false
 	bare = false
+	logallrefupdates = true
 	symlinks = false
 	ignorecase = true
-	logallrefupdates = true
-	worktree = D:/repos/git/github/link-intersystems/git-repository-commons/gradle/test/gradle-project
+	autocrlf = input
+[remote "origin"]
+	url = ../gradle-remote/
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+[user]
+	name = René Link
+	email = rene.link@link-intersystems.com
