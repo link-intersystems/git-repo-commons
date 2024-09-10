@@ -5,5 +5,5 @@
 # *.[oa]
 # *~
 _git/
-.bin/
 .gradle/
+.bin/
