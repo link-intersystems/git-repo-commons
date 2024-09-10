@@ -4,3 +4,4 @@
 a7983f884226ed7ef2c92910cb1177ca87538d46 67b309334a0df7afaf0c89b1c052ff5f5ef78723 René Link <rene.link@link-intersystems.com> 1725894401 +0200	commit: Added release plugin.
 67b309334a0df7afaf0c89b1c052ff5f5ef78723 0000000000000000000000000000000000000000 René Link <rene.link@link-intersystems.com> 1725894431 +0200	Branch: renamed refs/heads/master to refs/heads/main
 0000000000000000000000000000000000000000 67b309334a0df7afaf0c89b1c052ff5f5ef78723 René Link <rene.link@link-intersystems.com> 1725894431 +0200	Branch: renamed refs/heads/master to refs/heads/main
+67b309334a0df7afaf0c89b1c052ff5f5ef78723 47184f50353cb89ea30b3303de89f47007af022d René Link <rene.link@link-intersystems.com> 1725943938 +0200	commit: SNAPSHOT version

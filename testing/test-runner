@@ -16,10 +16,10 @@ function toUppercase(){
 function runTests(){
     for testScript in "$@"
     do
-      local testScript=$(realpath $testScript)
-      shift
-      local testScriptDir=$(dirname $testScript)
-      local buildDir="${testScriptDir}/.build/tests"
+      local testScript=$(realpath "$testScript")
+      local testScriptDir=$(dirname "$testScript")
+      local testScriptName=$(basename "$testScript")
+      local buildDir="${testScriptDir}/.build/tests/${testScriptName}"
       mkdir -p "${buildDir}"
 
       local beforeEachFn=$(listBeforeEach "$testScript")
