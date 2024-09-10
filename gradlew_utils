@@ -7,16 +7,22 @@ function currentVersion() {
 }
 
 increment_version() {
-  local delimiter=.
-  local array=($(echo "$1" | tr $delimiter '\n'))
-  array[$2]=$((array[$2]+1))
+  local versionStr="$1"
+  local versionPostfix=""
+  if [[ ${versionStr} == *-SNAPSHOT ]]; then
+    versionStr="${versionStr%-SNAPSHOT}"
+    versionPostfix="-SNAPSHOT"
+  fi
 
+  local delimiter="."
+  local array=($(echo "$versionStr" | tr $delimiter '\n'))
+  array[$2]=$((array[$2]+1))
   for (( j=$(($2+1)); j<${#array[@]}; j++ ));
   do
-    array[$j]=0
+      array[$j]=0
   done
 
-  echo $(local IFS=$delimiter ; echo "${array[*]}")
+  echo $(local IFS=$delimiter ; echo "${array[*]}${versionPostfix}")
 }
 
 function findGradlewPath() {
