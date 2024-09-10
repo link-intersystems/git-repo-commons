@@ -24,6 +24,17 @@ function testReleaseMinor(){
   assertEquals "1.3.0" $(git tag | grep "1.3.0")
 }
 
+function testReleaseMajor(){
+  assertSuccess ./.bin/gradlew_release major
+
+  . .bin/gradlew_utils
+
+  local result="$(currentVersion)"
+  log "$result"
+  assertEquals "2.0.1-SNAPSHOT" "$result"
+  assertEquals "2.0.0" $(git tag | grep "2.0.0")
+}
+
 function beforeEach(){
   rm -rf "$1/gradle-project"
   rm -rf "$1/gradle-remote"
