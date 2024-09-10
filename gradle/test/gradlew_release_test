@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+function testGradlewRelease(){
+  assertSuccess ./.bin/gradlew_release patch
+
+  . .bin/gradlew_utils
+
+  local result="$(currentVersion)"
+  log "$result"
+  assertEquals "$result" "1.2.4-SNAPSHOT"
+}
+
+function beforeEach(){
+  rm -rf "$1/gradle-project"
+  rm -rf "$1/gradle-remote"
+
+  cp -rap "gradle-project" "$1"
+  mv "$1/gradle-project/_git" "$1/gradle-project/.git"
+  cp -rap "gradle-remote" "$1"
+
+  cp -r "../.bin" "$1/gradle-project/.bin"
+
+  echo "$1/gradle-project"
+}
