@@ -1,39 +1,77 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+function testReleasePatchImplizit(){
+  assertSuccess ./.bin/gradlew_release patch --info
 
-function testReleasePatch(){
+  . .bin/gradlew_utils
+
+  assertEquals "1.2.4-SNAPSHOT" "$(currentVersion)"
+  assertEquals "1.2.3" $(git tag | grep "1.2.3")
+
+  git checkout HEAD~
+  assertEquals "1.2.3" "$(currentVersion)"
+
+  git checkout HEAD~
+  assertEquals "1.2.3-SNAPSHOT" "$(currentVersion)"
+}
+
+
+function testReleasePatchExplizit(){
   assertSuccess ./.bin/gradlew_release patch
 
   . .bin/gradlew_utils
 
-  local result="$(currentVersion)"
-  log "$result"
-  assertEquals "1.2.4-SNAPSHOT" "$result"
+  assertEquals "1.2.4-SNAPSHOT" "$(currentVersion)"
   assertEquals "1.2.3" $(git tag | grep "1.2.3")
+
+  git checkout HEAD~
+  assertEquals "1.2.3" "$(currentVersion)"
+
+  git checkout HEAD~
+  assertEquals "1.2.3-SNAPSHOT" "$(currentVersion)"
 }
+
 
 function testReleaseMinor(){
   assertSuccess ./.bin/gradlew_release minor
 
   . .bin/gradlew_utils
 
-  local result="$(currentVersion)"
-  log "$result"
-  assertEquals "1.3.1-SNAPSHOT" "$result"
+  assertEquals "1.3.1-SNAPSHOT" "$(currentVersion)"
   assertEquals "1.3.0" $(git tag | grep "1.3.0")
+
+  git checkout HEAD~
+  assertEquals "1.3.0" "$(currentVersion)"
+
+  git checkout HEAD~
+  assertEquals "1.3.0-SNAPSHOT" "$(currentVersion)"
+
+  git checkout HEAD~
+  assertEquals "1.2.3-SNAPSHOT" "$(currentVersion)"
 }
+
 
 function testReleaseMajor(){
   assertSuccess ./.bin/gradlew_release major
 
   . .bin/gradlew_utils
 
-  local result="$(currentVersion)"
-  log "$result"
-  assertEquals "2.0.1-SNAPSHOT" "$result"
+  assertEquals "2.0.1-SNAPSHOT" "$(currentVersion)"
   assertEquals "2.0.0" $(git tag | grep "2.0.0")
+  assertEquals "[Gradle Release Plugin] - new version commit:  '2.0.1-SNAPSHOT'." "$(git log --format=%B -n 1 )" "new version message"
+
+  git checkout HEAD~
+  assertEquals "2.0.0" "$(currentVersion)"
+  assertEquals " [Gradle Release Plugin] - pre tag commit:  '2.0.0'." "$(git log --format=%B -n 1)" "tag message"
+
+  git checkout HEAD~
+  assertEquals "2.0.0-SNAPSHOT" "$(currentVersion)"
+  assertEquals "[Gradle Release Plugin] - new version commit:  '2.0.0-SNAPSHOT'." "$(git log --format=%B -n 1)" "tag message"
+
+  git checkout HEAD~
+  assertEquals "1.2.3-SNAPSHOT" "$(currentVersion)"
 }
+
 
 function beforeEach(){
   rm -rf "$1/gradle-project"
