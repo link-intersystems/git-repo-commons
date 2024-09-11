@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+local SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 . "$SCRIPT_DIR/logging"
 
@@ -21,15 +21,15 @@ function runTests(){
 
     for testScript in "$@"
     do
-      local testScript=$(realpath "$testScript")
-      local testScriptDir=$(dirname "$testScript")
-      local testScriptName=$(basename "$testScript")
+      local testScriptRealpath=$(realpath "$testScript")
+      local testScriptDir=$(dirname "$testScriptRealpath")
+      local testScriptName=$(basename "$testScriptRealpath")
       local buildDir="${testScriptDir}/.build/tests/${testScriptName}"
       mkdir -p "${buildDir}"
 
-      local beforeEachFn=$(listBeforeEach "$testScript")
-      local testFunctions=$(listTests "$testScript")
-      local afterEachFn=$(listAfterEach "$testScript")
+      local beforeEachFn=$(listBeforeEach "$testScriptRealpath")
+      local testFunctions=$(listTests "$testScriptRealpath")
+      local afterEachFn=$(listAfterEach "$testScriptRealpath")
 
 
       while read test; do
@@ -72,7 +72,7 @@ function runTests(){
         )
         local exitCode=$?
         if [ $exitCode != 0 ]; then
-          log failed "TEST FAILED"
+          log failed "TEST FAILED $testScript::$test"
           exit $exitCode
         else
           log success "TEST SUCCESSFUL"
@@ -98,14 +98,14 @@ function listBeforeEach(){
   local testScript="$1"
   shift
 
-  grep -v -x -f <(declare -F) <(. ${testScript}; declare -F) | cut  -c 12- | grep "^beforeEach$"
+  grep -v -x -f <(declare -F) <(. ${testScript}; declare -F) | cut  -c 12- | grep "^beforeEach"
 }
 
 function listAfterEach(){
   local testScript="$1"
   shift
 
-  grep -v -x -f <(declare -F) <(. ${testScript}; declare -F) | cut  -c 12- | grep "^afterEach$"
+  grep -v -x -f <(declare -F) <(. ${testScript}; declare -F) | cut  -c 12- | grep "^afterEach"
 }
 
 function listTests(){

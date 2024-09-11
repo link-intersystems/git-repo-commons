@@ -2,3 +2,5 @@
 d668396b36495e88b9d03169f20315332f8568e6 0000000000000000000000000000000000000000 René Link <rene.link@link-intersystems.com> 1725972279 +0200	Branch: renamed refs/heads/master to refs/heads/main
 0000000000000000000000000000000000000000 d668396b36495e88b9d03169f20315332f8568e6 René Link <rene.link@link-intersystems.com> 1725972279 +0200	Branch: renamed refs/heads/master to refs/heads/main
 d668396b36495e88b9d03169f20315332f8568e6 22717aab360413ce41e0b4662a7698baa5d87a30 René Link <rene.link@link-intersystems.com> 1725972330 +0200	commit: Example project.
+22717aab360413ce41e0b4662a7698baa5d87a30 b803ecbf8ee8b800f0427e45060d16b8c84d2289 René Link <rene.link@link-intersystems.com> 1726031514 +0200	commit: Added gitLocal to ease working with embedded repo.
+b803ecbf8ee8b800f0427e45060d16b8c84d2289 75cfc4a66726b17275cf2599df6df1231ff1f8ad René Link <rene.link@link-intersystems.com> 1726031556 +0200	commit (amend): Added gitLocal to ease working with embedded repo.

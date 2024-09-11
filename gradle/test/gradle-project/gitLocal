@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+export GIT_DIR="${SCRIPT_DIR}/_git"
+export GIT_WORK_TREE="${SCRIPT_DIR}"
+
+git "$@"
