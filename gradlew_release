@@ -1,54 +1,52 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-PARENT_DIR="$(dirname "$SCRIPT_DIR")"
+shopt -s extglob
 
-. ${SCRIPT_DIR}/gradlew_utils
+function main(){
+  local SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+  local currentVersion=$(. ${SCRIPT_DIR}/gradlew_utils; currentVersion)
 
-RELEASE_STRATEGY="patch"
-
-if [ ! -z "$1" ]; then
-  RELEASE_STRATEGY="$1"
+  local release_strategy="${1-patch}"
   shift
-fi
+
+  case "$release_strategy" in
+        "--help" | "-?" )
+          printHelp
+          exit 0
+        ;;
+        "patch" )
+          # Nothing to do
+        ;;
+        "minor" )
+          RELEASE_VERSION=$(. ${SCRIPT_DIR}/gradlew_utils; increment_version "$currentVersion" 1)
+        ;;
+        "major" )
+          RELEASE_VERSION=$(. ${SCRIPT_DIR}/gradlew_utils; increment_version "$currentVersion" 0)
+        ;;
+        +([0-9])?(.+([0-9]))?(.+([0-9])) )
+          RELEASE_VERSION="$release_strategy-SNAPSHOT"
+        ;;
+        *)
+          printHelp
+          exit 0
+        ;;
+  esac
+
+  echo "Executing ${release_strategy} release"
+
+  source "${SCRIPT_DIR}/gradlew_utils"
+
+  if [ ! -z "${RELEASE_VERSION}" ]; then
+    gradlewExec --info -Prelease.useAutomaticVersion=true -Prelease.newVersion="${RELEASE_VERSION}" :updateVersion :commitNewVersion $@
+  fi
+
+  gradlewExec --info -Prelease.useAutomaticVersion=true release $@
+}
 
 function printHelp(){
    >&2 echo "Usage: $(basename "$0") [patch|minor|major]"
 }
 
-shopt -s extglob
-case "$RELEASE_STRATEGY" in
-      "--help" | "-?" )
-        printHelp
-        exit 0
-      ;;
-      "patch" )
-        # Nothing to do
-      ;;
-      "minor" )
-        CURRENT_VERSION=$(currentVersion)
-        RELEASE_VERSION=$(increment_version ${CURRENT_VERSION} 1)
-      ;;
-      "major" )
-        CURRENT_VERSION=$(currentVersion)
-        RELEASE_VERSION=$(increment_version ${CURRENT_VERSION} 0)
-      ;;
-      +([0-9])?(.+([0-9]))?(.+([0-9])) )
-        RELEASE_VERSION="$RELEASE_STRATEGY-SNAPSHOT"
-      ;;
-      *)
-        printHelp
-        exit 0
-      ;;
-esac
 
-echo "Executing ${RELEASE_STRATEGY} release"
-
-source "${SCRIPT_DIR}/gradlew_utils"
-
-if [ ! -z "${RELEASE_VERSION}" ]; then
-  gradlewExec --info -Prelease.useAutomaticVersion=true -Prelease.newVersion="${RELEASE_VERSION}" :updateVersion :commitNewVersion
-fi
-
-gradlewExec --info -Prelease.useAutomaticVersion=true release "$@"
+main $@
 
