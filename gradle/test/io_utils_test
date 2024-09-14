@@ -77,6 +77,39 @@ function testPrintHelp(){
   printHelp "EXEC" options
 }
 
+
+function testConfirmation(){
+
+
+  . .bin/io_utils
+
+  (
+    declare -a options
+    options[0]="y"
+    options[1]="n"
+
+    local output=$(echo  "ty" | (
+      confirmation "Do you want to exit?" options result
+
+      if [ "$result" != "y" ]; then
+        echo "Expected y, but was $result"
+        exit 1
+      fi
+    ))
+
+    if [ $? -ne 0 ]; then
+      log error $output
+    fi
+
+    assertContains "$output" "Do you want to exit?"
+    assertContains "$output" "You must enter a valid option."
+    assertContains "$output" "(y|n)"
+
+
+  )
+}
+
+
 function beforeEach(){
   rm -rf "$1/gradle-project"
   rm -rf "$1/gradle-remote"
