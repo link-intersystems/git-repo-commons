@@ -70,7 +70,7 @@ function testPrintHelp(){
   declare -A options
   options["-n|--name"]="The name"
   options["--boolArg"]="Set if true"
-  options["--otherName|-o"]="The other name"
+  options["--otherName"]="The other name"
 
   . .bin/io_utils
 
