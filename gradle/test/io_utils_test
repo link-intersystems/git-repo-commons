@@ -110,6 +110,22 @@ function testConfirmation(){
 }
 
 
+function testConfirmationDefaultValue(){
+  . .bin/io_utils
+
+  declare -a options
+  options[0]="y"
+  options[1]="n"
+
+  confirmation "Do you want to exit?" options result "y"
+
+  if [ "$result" != "y" ]; then
+    echo "Expected y, but was $result"
+    exit 1
+  fi
+}
+
+
 function beforeEach(){
   rm -rf "$1/gradle-project"
   rm -rf "$1/gradle-remote"
