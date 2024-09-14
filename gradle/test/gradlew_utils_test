@@ -58,5 +58,5 @@ function beforeEach(){
 
   cp -r "../.bin" "$1/gradle-project/.bin"
 
-  echo "$1/gradle-project"
+  setTestDir "$1/gradle-project"
 }

@@ -13,6 +13,7 @@ function toUppercase(){
   printf '%s\n' "$1" | awk '{ print toupper($0) }'
 }
 
+
 function runTests(){
     if [ $# -eq 0 ]; then
       echo "No tests scripts specified."
@@ -32,65 +33,99 @@ function runTests(){
       local afterEachFn=$(listAfterEach "$testScriptRealpath")
 
 
-      while read test; do
-        function log(){
-          local level=$1
-          shift
+      if [ ! -z "$testFunctions" ]; then
+        while read test; do
+          function log(){
+            local level=$1
+            shift
 
-          case "$level" in
-            failed|error) logError "$(echo "$@" | sed -e "s/^/[$test] /")";;
-            success|ok)  logSuccess "$(echo "$@" | sed -e "s/^/[$test] /")";;
-            warn) logWarn "$(echo "$@" | sed -e "s/^/[$test] /")";;
-            *) logInfo "$(echo "$level" "$@" | sed -e "s/^/[$test] /")";;
-          esac
-        }
+            case "$level" in
+              failed|error) logError "$(echo "$@" | sed -e "s/^/[$test] /")";;
+              success|ok)  logSuccess "$(echo "$@" | sed -e "s/^/[$test] /")";;
+              warn) logWarn "$(echo "$@" | sed -e "s/^/[$test] /")";;
+              *) logInfo "$(echo "$level" "$@" | sed -e "s/^/[$test] /")";;
+            esac
+          }
 
-        (
-            log warn "Executing tests in '$testScript'"
-            . "${SCRIPT_DIR}/test-utils"
-            . "$testScript"
+          (
+              log warn "Executing tests in '$testScript'"
+              . "${SCRIPT_DIR}/test-utils"
+              . "$testScript"
 
-            cd "${testScriptDir}"
+              cd "${testScriptDir}"
 
-            local beforeEachResult=""
-            if [[ ! -z "${beforeEachFn}" ]]; then
-                log warn "${beforeEachFn}"
-                beforeEachResult=$($beforeEachFn "${buildDir}")
-            fi
+              executeBefore ${beforeEachFn} "${buildDir}" testDir
 
-            executeTest
-            local exitCode=$?
+              executeTest "${buildDir}" "${testDir}" "$test"
+              local exitCode=$?
 
-            if [[ ! -z "${afterEachFn}" ]]; then
-               log warn "${afterEachFn}"
-                ${afterEachFn} "${buildDir}" "${beforeEachResult}"
-            fi
+              if [[ ! -z "${afterEachFn}" ]]; then
+                log warn "${afterEachFn}"
+                ${afterEachFn} "${buildDir}" "${testDir}"
+              fi
 
-            if [ $exitCode != 0 ]; then
-              exit $exitCode
-            fi
-        )
-        local exitCode=$?
-        if [ $exitCode != 0 ]; then
-          log failed "TEST FAILED $testScript::$test"
-          exit $exitCode
-        else
-          log success "TEST SUCCESSFUL"
-        fi
-      done <<< "$testFunctions"
-
+              if [ $exitCode != 0 ]; then
+                exit $exitCode
+              fi
+          )
+          local exitCode=$?
+          if [ $exitCode != 0 ]; then
+            log failed "TEST FAILED $testScript::$test"
+            exit $exitCode
+          else
+            log success "TEST SUCCESSFUL"
+          fi
+        done <<< "$testFunctions"
+      else
+        logError "No tests found in $testScript"
+      fi
     done
+}
+
+function executeBefore(){
+  local beforeEachFn="$1"
+  local buildDir="$2"
+  local returnVarName="$3"
+  local _testDir="$buildDir"
+
+
+
+  if [[ ! -z "${beforeEachFn}" ]]; then
+    log warn "${beforeEachFn}"
+
+    # get current setTestDir function
+    local oldFunc=$(type setTestDir 2> /dev/null | sed '1d')
+
+    function setTestDir() {
+        printf -v "_testDir" "$1"
+    }
+
+    $beforeEachFn "${buildDir}"
+
+    # restore oldFunction
+    if [ -z "$oldFunc" ]; then
+      unset setTestDir
+    else
+      source /dev/stdin <<<"$(cat <<<$oldFunc)"
+    fi
+
+    printf -v "$returnVarName" "$_testDir"
+  fi
 }
 
 function executeTest(){
    (
-    if [ -d "$beforeEachResult" ]; then
-      cd "$beforeEachResult"
+   local buildDirectory="$1"
+   local testDirectory="$2"
+   local testFn="$3"
+
+    if [ -d "$testDirectory" ]; then
+      cd "$testDirectory"
     fi
 
-    log warn "Executing '$test' in working directory $(pwd)"
+    log warn "Executing '$testFn' in $(pwd)"
 
-    ${test} "${buildDir}" "$beforeEachResult"
+    ${testFn} "${buildDirectory}"
    )
 }
 

@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+function parseArgs(){
+  # Workarount https://mywiki.wooledge.org/BashFAQ/048#line-120
+  if [[ $1 != result ]]; then declare -n result=$1; fi;
+  if [[ $2 != options ]]; then declare -n options=$2; fi;
+  if [[ $3 != arguments ]]; then declare -n arguments=$3; fi;
+
+  shopt -s extglob
+  local key
+  for arg in "${arguments[@]}"; do
+
+    for opt in "${!options[@]}"; do
+      if [[ "$arg" =~ $opt ]]; then
+        if [ ! -z "$key" ]; then
+            result["$key"]="true"
+        fi
+        key="${arg/[-]?([-])/}"
+        continue 2
+      fi
+    done
+
+    if [ ! -z "$key" ]; then
+       result["$key"]="$arg"
+       key=""
+    fi
+
+  done
+
+  if [ ! -z "$key" ]; then
+    result["$key"]="true"
+  fi
+}

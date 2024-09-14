@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+function testParseArgs(){
+  declare -a arguments
+  arguments[0]="-name"
+  arguments[1]="Name"
+
+  arguments[2]="--boolArg"
+
+  arguments[3]="--otherName"
+  arguments[4]="OtherName"
+
+  arguments[5]="--boolArg2"
+
+  declare -A options
+  options["-n|--name"]="The name"
+  options["--boolArg"]="Set if true"
+  options["--otherName|-o"]="The other name"
+
+  . .bin/io_utils
+
+  declare -A parsedArgs
+  parseArgs parsedArgs options arguments
+
+  assertEquals "Name" ${parsedArgs["name"]}
+  assertEquals "OtherName" ${parsedArgs["otherName"]}
+  assertEquals "true" ${parsedArgs["boolArg"]}
+  assertEquals "true" ${parsedArgs["boolArg2"]}
+}
+
+function beforeEach(){
+  rm -rf "$1/gradle-project"
+  rm -rf "$1/gradle-remote"
+
+  cp -rap "gradle-project" "$1"
+  mv "$1/gradle-project/_git" "$1/gradle-project/.git"
+  cp -rap "gradle-remote" "$1"
+
+  cp -r "../.bin" "$1/gradle-project/.bin"
+
+  setTestDir "$1/gradle-project"
+}
