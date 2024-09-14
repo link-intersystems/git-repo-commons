@@ -3,33 +3,51 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 function parseArgs(){
-  # Workarount https://mywiki.wooledge.org/BashFAQ/048#line-120
+  # Workaround: https://mywiki.wooledge.org/BashFAQ/048#line-120
   if [[ $1 != result ]]; then declare -n result=$1; fi;
-  if [[ $2 != options ]]; then declare -n options=$2; fi;
-  if [[ $3 != arguments ]]; then declare -n arguments=$3; fi;
+  if [[ $2 != options ]]; then declare -n options=$3; fi;
+  if [[ $3 != arguments ]]; then declare -n arguments=$4; fi;
 
   shopt -s extglob
-  local key
+  local optKey
   for arg in "${arguments[@]}"; do
 
+    # Is actual arg an option?
+    local is_option="false"
     for opt in "${!options[@]}"; do
       if [[ "$arg" =~ $opt ]]; then
-        if [ ! -z "$key" ]; then
-            result["$key"]="true"
+        if [ ! -z "$optKey" ]; then
+            result["$optKey"]="true"
         fi
-        key="${arg/[-]?([-])/}"
-        continue 2
+        optKey="${arg/[-]?([-])/}"
+        is_option="true"
+        continue 2 # next arg
       fi
     done
 
-    if [ ! -z "$key" ]; then
-       result["$key"]="$arg"
-       key=""
+    if [ $is_option == "false" ] && [ -z "$optKey" ]; then
+        return 1
+    fi
+
+    if [ ! -z "$optKey" ]; then
+       result["$optKey"]="$arg"
+       optKey=""
     fi
 
   done
 
-  if [ ! -z "$key" ]; then
-    result["$key"]="true"
+  if [ ! -z "$optKey" ]; then
+    result["$optKey"]="true"
   fi
+
+  return 0
+}
+
+function printHelp(){
+    if [[ $2 != options ]]; then declare -n options=$2; fi;
+    echo "Usage: $1 [OPTIONS]"
+    echo -e "  Options:"
+    for opt in "${!options[@]}"; do
+      echo -e "    $opt:\t${options[$opt]}"
+    done
 }

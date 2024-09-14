@@ -2,7 +2,7 @@
 
 function testParseArgs(){
   declare -a arguments
-  arguments[0]="-name"
+  arguments[0]="--name"
   arguments[1]="Name"
 
   arguments[2]="--boolArg"
@@ -10,8 +10,63 @@ function testParseArgs(){
   arguments[3]="--otherName"
   arguments[4]="OtherName"
 
-  arguments[5]="--boolArg2"
+  declare -A options
+  options["--name"]="The name"
+  options["--boolArg"]="Set if true"
+  options["--otherName"]="The other name"
 
+  . .bin/io_utils
+
+  declare -A parsedArgs
+  parseArgs parsedArgs options arguments
+  if [ $? -ne 0 ]; then
+    log error "Expected all options valid."
+    exit 1
+  fi
+
+  assertEquals "Name" ${parsedArgs["name"]}
+  assertEquals "OtherName" ${parsedArgs["otherName"]}
+  assertEquals "true" ${parsedArgs["boolArg"]}
+}
+
+
+function testParseWrongArgs(){
+  declare -a arguments
+  arguments[0]="--someUnknownArg"
+  arguments[1]="value"
+
+  declare -A options
+  options["-someArg"]="Some arg"
+
+  . .bin/io_utils
+
+  declare -A parsedArgs
+  parseArgs parsedArgs options arguments
+
+  if [ $? -ne 1 ]; then
+    log error "Expected wrong option"
+  fi
+}
+
+function testParseArgOnlyValue(){
+  declare -a arguments
+  arguments[0]="value"
+
+  declare -A options
+  options["-someArg"]="Some arg"
+
+  . .bin/io_utils
+
+  declare -A parsedArgs
+  parseArgs parsedArgs options arguments
+
+  if [ $? -ne 1 ]; then
+    log error "Expected wrong option"
+  fi
+}
+
+
+function testPrintHelp(){
   declare -A options
   options["-n|--name"]="The name"
   options["--boolArg"]="Set if true"
@@ -19,13 +74,7 @@ function testParseArgs(){
 
   . .bin/io_utils
 
-  declare -A parsedArgs
-  parseArgs parsedArgs options arguments
-
-  assertEquals "Name" ${parsedArgs["name"]}
-  assertEquals "OtherName" ${parsedArgs["otherName"]}
-  assertEquals "true" ${parsedArgs["boolArg"]}
-  assertEquals "true" ${parsedArgs["boolArg2"]}
+  printHelp "EXEC" options
 }
 
 function beforeEach(){
