@@ -5,8 +5,8 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 function parseArgs(){
   # Workaround: https://mywiki.wooledge.org/BashFAQ/048#line-120
   if [[ $1 != result ]]; then declare -n result=$1; fi;
-  if [[ $2 != options ]]; then declare -n options=$3; fi;
-  if [[ $3 != arguments ]]; then declare -n arguments=$4; fi;
+  if [[ $2 != options ]]; then declare -n options=$2; fi;
+  if [[ $3 != arguments ]]; then declare -n arguments=$3; fi;
 
   shopt -s extglob
   local optKey
@@ -50,4 +50,33 @@ function printHelp(){
     for opt in "${!options[@]}"; do
       echo -e "    $opt:\t${options[$opt]}"
     done
+}
+
+
+function confirmation(){
+  local message="$1"
+  if [[ $2 != options ]]; then declare -n options=$2; fi;
+  if [[ $3 != result ]]; then declare -n result=$3; fi;
+
+  local answer
+  local options_str=$(join_by "|" ${options[@]})
+  echo "${message} ($options_str)"
+  read -n 1 -r answer
+  echo    # (optional) move to a new line
+
+  while ! [[ ${options[*]} =~ "$answer" ]] ; do
+    echo "You must enter a valid option."
+    echo "${message} ($options_str)"
+    read -n 1 -r answer
+    echo    # (optional) move to a new line
+  done
+
+  printf -v result "$answer"
+}
+
+function join_by {
+  local d=${1-} f=${2-}
+  if shift 2; then
+    printf %s "$f" "${@/#/$d}"
+  fi
 }
