@@ -38,6 +38,16 @@ function main(){
   current_branch=$(git rev-parse --abbrev-ref HEAD)
   (
     git checkout --detach HEAD
+    local cherry_pick=$(git rev-list "$( git rev-list --grep="new version" $tagToDelete..HEAD)..HEAD")
+
+    if [ ! -z "${cherry_pick}" ]; then
+      echo "Found commits after the latest release ${latest_tag} to cherry-pick:"
+      echo "$cherry_pick{}" | tr ' ' '\n'
+      if ! git cherry-pick -m 1 --allow-empty ${cherry_pick}; then
+        echo "Cherry-pick went wrong. Aborting..."
+        exit 1
+      fi
+    fi
   )
   git checkout -f ${current_branch}
 }
