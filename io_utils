@@ -58,20 +58,23 @@ function confirmation(){
   if [[ $2 != options ]]; then declare -n options=$2; fi;
   if [[ $3 != result ]]; then declare -n result=$3; fi;
 
-  local answer
+  if [ ! -z "$4" ]; then
+    result="$4"
+    return 0
+  fi
+
   local options_str=$(join_by "|" ${options[@]})
   echo "${message} ($options_str)"
-  read -n 1 -r answer
+  read -n 1 -r result
   echo    # (optional) move to a new line
 
-  while ! [[ ${options[*]} =~ "$answer" ]] ; do
+  while ! [[ ${options[*]} =~ "$result" ]] ; do
     echo "You must enter a valid option."
     echo "${message} ($options_str)"
-    read -n 1 -r answer
+    read -n 1 -r result
     echo    # (optional) move to a new line
   done
 
-  printf -v result "$answer"
 }
 
 function join_by {

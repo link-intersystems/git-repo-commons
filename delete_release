@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+. io_utils
+. git_utils
+
+function main(){
+  declare -A options
+  options["--batch"]="All questions will be answered with the default answer."
+  local arguments=($@)
+  declare -A args
+  parseArgs args options arguments
+  if [ $? -ne 0 ]; then
+    printHelp $(basename $0) options
+  fi
+
+  local defaultAnswer=""
+  if [ "${args["batch"]}" == "true" ]; then
+    defaultAnswer="y"
+  fi
+
+  local tagToDelete=$(latestTag)
+  local confirmationOptions=(y n)
+
+  declare answer
+  confirmation "Do you want to delete tag '$tagToDelete'?" confirmationOptions answer "$defaultAnswer"
+
+  if [ "$answer" == "n" ]; then
+    exit 1
+  fi
+
+  current_branch=$(git rev-parse --abbrev-ref HEAD)
+  (
+    git checkout --detach HEAD
+  )
+  git checkout -f ${current_branch}
+}
+
+main $*
