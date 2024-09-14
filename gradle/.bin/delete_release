@@ -17,11 +17,18 @@ function main(){
   if [ "${args["batch"]}" == "true" ]; then
     defaultAnswer="y"
   fi
-
-  local tagToDelete=$(latestTag)
+  declare answer
   local confirmationOptions=(y n)
 
-  declare answer
+  if git status --porcelain; then
+    confirmation "You have local changes. They might be overwritten if you continue. Do you want to abort?" confirmationOptions answer "$defaultAnswer"
+    if [ "$answer" == "y" ]; then
+      echo "Aborting due to local git changes."
+      exit 1
+    fi
+  fi
+
+  local tagToDelete=$(latestTag)
   confirmation "Do you want to delete tag '$tagToDelete'?" confirmationOptions answer "$defaultAnswer"
 
   if [ "$answer" == "n" ]; then
