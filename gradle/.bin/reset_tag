@@ -61,14 +61,14 @@ function main(){
     local cherry_pick_start=$( git rev-list --grep="new version" $tagToDelete..HEAD)
     local cherry_pick=$(git --no-pager log --pretty=oneline  $cherry_pick_start..HEAD)
 
+    git reset --hard $tagToDelete^
+
     if [ ! -z "${cherry_pick}" ]; then
       echo "Found commits after the latest release ${tagToDelete} to cherry-pick:"
       cat <<<$cherry_pick
 
       confirmation "Do you want cherry-pick them?" confirmationOptions answer "$defaultAnswer"
       if [ "$answer" == "n" ]; then exit 1; fi
-
-      git reset --hard $tagToDelete^
 
       while read -r commit
       do

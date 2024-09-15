@@ -2,12 +2,19 @@
 
 function testResetTag(){
   prepareTestFixture
+
+  assertSuccess git rev-parse "v1.0.1"
+
   ./.bin/reset_tag --batch
 
-  if (git tag | grep "v1.0.1"); then
-    log error "Expected tag v1.0.1 to be deleted, but it still exists."
-  fi
+  assertFail git rev-parse "v1.0.1"
+  assertSuccess git rev-parse "v1.0.0"
+
+  assertContains "$(git log -n1 --oneline HEAD)" "world added."
+  assertContains "$(git log -n1 --oneline HEAD~)" "hello added."
+  assertContains "$(git log -n1 --oneline HEAD~2)" "new version commit:  'v1.0.1-SNAPSHOT'"
 }
+
 
 function prepareTestFixture(){
   prepareReleaseCommits 1.0.0
@@ -15,12 +22,14 @@ function prepareTestFixture(){
   addFileCommit world "World"
   prepareReleaseCommits 1.0.1
   git push
+  git push --tags
 }
 
 function prepareReleaseCommits(){
   local version="${1:-1.0.0}"
   local newVersion=$(. ./.bin/gradlew_utils; increment_version "$version" 2)
   git commit --allow-empty -m " [Gradle Release Plugin] - pre tag commit:  'v${version}'."
+  git tag "v${version}"
   git commit --allow-empty -m "[Gradle Release Plugin] - new version commit:  'v${newVersion}-SNAPSHOT'."
 }
 

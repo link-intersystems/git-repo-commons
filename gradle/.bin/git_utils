@@ -3,7 +3,7 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 function latestTag() {
-  git tag -l ${1} --sort=-committerdate | tail -n1
+  git tag -l ${1} | tail -n1
 }
 
 function onGitRootDir() {
