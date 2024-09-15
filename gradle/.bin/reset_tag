@@ -5,8 +5,11 @@
 
 function main(){
   declare -A options
+  options["--tag"]="The tag to delete. Latest tag is used as default."
   options["--batch"]="All questions will be answered with the default answer."
+
   local arguments=($@)
+
   declare -A args
   parseArgs args options arguments
   if [ $? -ne 0 ]; then
@@ -17,10 +20,22 @@ function main(){
   if [ "${args["batch"]}" == "true" ]; then
     defaultAnswer="y"
   fi
+
+  declare tagToDelete
+  if [ ! -z "${args["tag"]}"  ]; then
+    if ! (git tag | grep "${args["tag"]}") > /dev/null; then
+      echo "Tag "${args["tag"]}" does not exist."
+      exit 1
+    fi
+    tagToDelete="${args["tag"]}"
+  else
+    tagToDelete=$(latestTag)
+  fi
+
   declare answer
   local confirmationOptions=(y n)
 
-  if git status -u no --porcelain; then
+  if ! git status -u no --porcelain; then
     local ignoreChangedFiles=""
     if [ "${args["batch"]}" == "true" ]; then
       ignoreChangedFiles="n"
@@ -32,7 +47,6 @@ function main(){
     fi
   fi
 
-  local tagToDelete=$(latestTag)
   local tagToDeleteId=$(git rev-parse $tagToDelete)
   confirmation "Do you want to delete tag '$tagToDelete'?" confirmationOptions answer "$defaultAnswer"
   if [ "$answer" == "n" ]; then exit 1; fi
