@@ -33,27 +33,59 @@ function main(){
   fi
 
   local tagToDelete=$(latestTag)
+  local tagToDeleteId=$(git rev-parse $tagToDelete)
   confirmation "Do you want to delete tag '$tagToDelete'?" confirmationOptions answer "$defaultAnswer"
+  if [ "$answer" == "n" ]; then exit 1; fi
 
-  if [ "$answer" == "n" ]; then
-    exit 1
-  fi
-
-  current_branch=$(git rev-parse --abbrev-ref HEAD)
+  local current_branch=$(git rev-parse --abbrev-ref HEAD)
+  local current_branch_commit_id=$(git rev-parse $current_branch)
+  echo "Current branch at $current_branch_commit_id"
   (
     git checkout --detach HEAD
-    local cherry_pick=$(git rev-list "$( git rev-list --grep="new version" $tagToDelete..HEAD)..HEAD")
+    local cherry_pick_start=$( git rev-list --grep="new version" $tagToDelete..HEAD)
+    local cherry_pick=$(git --no-pager log --pretty=oneline  $cherry_pick_start..HEAD)
 
     if [ ! -z "${cherry_pick}" ]; then
-      echo "Found commits after the latest release ${latest_tag} to cherry-pick:"
-      echo "$cherry_pick{}" | tr ' ' '\n'
-      if ! git cherry-pick -m 1 --allow-empty ${cherry_pick}; then
-        echo "Cherry-pick went wrong. Aborting..."
-        exit 1
-      fi
+      echo "Found commits after the latest release ${tagToDelete} to cherry-pick:"
+      cat <<<$cherry_pick
+
+      confirmation "Do you want cherry-pick them?" confirmationOptions answer "$defaultAnswer"
+      if [ "$answer" == "n" ]; then exit 1; fi
+
+      git reset --hard $tagToDelete^
+
+      while read -r commit
+      do
+        if ! git cherry-pick -m 1 --allow-empty ${commit}; then
+          echo "Cherry-pick went wrong. Aborting..."
+          exit 1
+        fi
+      done < <(tac <<<$cherry_pick | awk '{print $1}')
     fi
+
+    git branch -f ${current_branch} HEAD
+    git tag -d $tagToDelete
   )
-  git checkout -f ${current_branch}
+
+  if [ $? -ne 0 ]; then
+    git branch -f ${current_branch} ${current_branch_commit_id}
+    git checkout ${current_branch}
+    exit 1
+  else
+    echo "Rollback changes using:"
+    echo " git checkout ${current_branch} "
+    echo " git reset --hard ${current_branch_commit_id} "
+    echo " git tag $tagToDelete $tagToDeleteId"
+
+    git branch -f ${current_branch} HEAD
+    git checkout ${current_branch}
+
+    confirmation "Do you want to force push the changes?" confirmationOptions answer "$defaultAnswer"
+    if [ "$answer" == "y" ]; then
+      git push --delete origin "$tagToDelete"
+      git push -f
+    fi
+  fi
 }
 
 main $*
