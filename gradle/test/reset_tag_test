@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+function testResetTag(){
+  prepareTestFixture
+  ./.bin/reset_tag --batch
+
+  if (git tag | grep "v1.0.1"); then
+    log error "Expected tag v1.0.1 to be deleted, but it still exists."
+  fi
+}
+
+function prepareTestFixture(){
+  prepareReleaseCommits 1.0.0
+  addFileCommit hello "Hello"
+  addFileCommit world "World"
+  prepareReleaseCommits 1.0.1
+  git push
+}
+
+function prepareReleaseCommits(){
+  local version="${1:-1.0.0}"
+  local newVersion=$(. ./.bin/gradlew_utils; increment_version "$version" 2)
+  git commit --allow-empty -m " [Gradle Release Plugin] - pre tag commit:  'v${version}'."
+  git commit --allow-empty -m "[Gradle Release Plugin] - new version commit:  'v${newVersion}-SNAPSHOT'."
+}
+
+function addFileCommit(){
+    cat <<<$2 > $1
+    git add $1
+    git commit -m "$1 added."
+
+}
+
+function beforeEach(){
+  rm -rf "$1/gradle-project"
+  rm -rf "$1/gradle-remote"
+
+  cp -rap "gradle-project" "$1"
+  mv "$1/gradle-project/_git" "$1/gradle-project/.git"
+  cp -rap "gradle-remote" "$1"
+
+  cp -r "../.bin" "$1/gradle-project/.bin"
+
+  setTestDir "$1/gradle-project"
+}
