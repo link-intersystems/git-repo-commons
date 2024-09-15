@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
-. io_utils
-. git_utils
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+. "${SCRIPT_DIR}/io_utils"
+. "${SCRIPT_DIR}/git_utils"
 
 function main(){
   declare -A options
