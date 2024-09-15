@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+
+function unixPath() {
+    local dir="$1"
+    if where cygpath > /dev/null 2>&1; then
+      dir=$(cygpath -u "$dir")
+    fi
+    echo "$dir"
+}
+
+function testOnGitRootDir(){
+  . .bin/git_utils
+
+  cd gradle/wrapper
+
+  local currentDir=$(unixPath "$(pwd)")
+
+  local result=$(onGitRootDir pwd)
+
+  assertEquals $(unixPath $(git rev-parse --show-toplevel)) $result
+  assertEquals "$currentDir" $(pwd)
+}
+
+function testOnGitRootDir(){
+  . .bin/git_utils
+
+  cd gradle/wrapper
+
+  local currentDir=$(unixPath "$(pwd)")
+
+  local result=$(onGitRootDir pwd)
+
+  assertEquals $(unixPath $(git rev-parse --show-toplevel)) $result
+  assertEquals "$currentDir" $(pwd)
+}
+
+function testLatestTag(){
+  . .bin/git_utils
+
+  touch test
+  git add .
+  git commit -m 'Test'
+  touch test2
+  git add .
+  git commit -m 'Test2'
+  touch test3
+  git add .
+  git commit -m 'Test3'
+
+  git tag v1.0.0 HEAD~2
+  git tag 1.0.1 HEAD~
+  git tag v1.2.0 HEAD
+
+  assertEquals "v1.2.0" $(latestTag)
+}
+
+function beforeEach(){
+  rm -rf "$1/gradle-project"
+  rm -rf "$1/gradle-remote"
+
+  cp -rap "gradle-project" "$1"
+  mv "$1/gradle-project/_git" "$1/gradle-project/.git"
+  cp -rap "gradle-remote" "$1"
+
+  cp -r "../.bin" "$1/gradle-project/.bin"
+
+  setTestDir "$1/gradle-project"
+}

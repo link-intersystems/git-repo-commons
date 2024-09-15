@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+
+function testParseArgs(){
+  declare -a arguments
+  arguments[0]="--name"
+  arguments[1]="Name"
+
+  arguments[2]="--boolArg"
+
+  arguments[3]="--otherName"
+  arguments[4]="OtherName"
+
+  declare -A options
+  options["--name"]="The name"
+  options["--boolArg"]="Set if true"
+  options["--otherName"]="The other name"
+
+  . .bin/io_utils
+
+  declare -A parsedArgs
+  parseArgs parsedArgs options arguments
+  if [ $? -ne 0 ]; then
+    log error "Expected all options valid."
+    exit 1
+  fi
+
+  assertEquals "Name" ${parsedArgs["name"]}
+  assertEquals "OtherName" ${parsedArgs["otherName"]}
+  assertEquals "true" ${parsedArgs["boolArg"]}
+}
+
+
+function testParseWrongArgs(){
+  declare -a arguments
+  arguments[0]="--someUnknownArg"
+  arguments[1]="value"
+
+  declare -A options
+  options["-someArg"]="Some arg"
+
+  . .bin/io_utils
+
+  declare -A parsedArgs
+  parseArgs parsedArgs options arguments
+
+  if [ $? -ne 1 ]; then
+    log error "Expected wrong option"
+  fi
+}
+
+function testParseArgOnlyValue(){
+  declare -a arguments
+  arguments[0]="value"
+
+  declare -A options
+  options["-someArg"]="Some arg"
+
+  . .bin/io_utils
+
+  declare -A parsedArgs
+  parseArgs parsedArgs options arguments
+
+  if [ $? -ne 1 ]; then
+    log error "Expected wrong option"
+  fi
+}
+
+
+function testPrintHelp(){
+  declare -A options
+  options["-n|--name"]="The name"
+  options["--boolArg"]="Set if true"
+  options["--otherName"]="The other name"
+
+  . .bin/io_utils
+
+  printHelp "EXEC" options
+}
+
+
+function testConfirmation(){
+
+
+  . .bin/io_utils
+
+  (
+    declare -a options
+    options[0]="y"
+    options[1]="n"
+
+    local output=$(echo  "ty" | (
+      confirmation "Do you want to exit?" options result
+
+      if [ "$result" != "y" ]; then
+        echo "Expected y, but was $result"
+        exit 1
+      fi
+    ))
+
+    if [ $? -ne 0 ]; then
+      log error $output
+    fi
+
+    assertContains "$output" "Do you want to exit?"
+    assertContains "$output" "You must enter a valid option."
+    assertContains "$output" "(y|n)"
+
+
+  )
+}
+
+
+function testConfirmationDefaultValue(){
+  . .bin/io_utils
+
+  declare -a options
+  options[0]="y"
+  options[1]="n"
+
+  confirmation "Do you want to exit?" options result "y"
+
+  if [ "$result" != "y" ]; then
+    echo "Expected y, but was $result"
+    exit 1
+  fi
+}
+
+
+function beforeEach(){
+  rm -rf "$1/gradle-project"
+  rm -rf "$1/gradle-remote"
+
+  cp -rap "gradle-project" "$1"
+  mv "$1/gradle-project/_git" "$1/gradle-project/.git"
+  cp -rap "gradle-remote" "$1"
+
+  cp -r "../.bin" "$1/gradle-project/.bin"
+
+  setTestDir "$1/gradle-project"
+}

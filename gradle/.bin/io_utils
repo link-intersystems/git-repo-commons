@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+function parseArgs(){
+  # Workaround: https://mywiki.wooledge.org/BashFAQ/048#line-120
+  if [[ $1 != result ]]; then declare -n result=$1; fi;
+  if [[ $2 != options ]]; then declare -n options=$2; fi;
+  if [[ $3 != arguments ]]; then declare -n arguments=$3; fi;
+
+  shopt -s extglob
+  local optKey
+  for arg in "${arguments[@]}"; do
+
+    # Is actual arg an option?
+    local is_option="false"
+    for opt in "${!options[@]}"; do
+      if [[ "$arg" =~ $opt ]]; then
+        if [ ! -z "$optKey" ]; then
+            result["$optKey"]="true"
+        fi
+        optKey="${arg/[-]?([-])/}"
+        is_option="true"
+        continue 2 # next arg
+      fi
+    done
+
+    if [ $is_option == "false" ] && [ -z "$optKey" ]; then
+        return 1
+    fi
+
+    if [ ! -z "$optKey" ]; then
+       result["$optKey"]="$arg"
+       optKey=""
+    fi
+
+  done
+
+  if [ ! -z "$optKey" ]; then
+    result["$optKey"]="true"
+  fi
+
+  return 0
+}
+
+function printHelp(){
+    if [[ $2 != options ]]; then declare -n options=$2; fi;
+    echo "Usage: $1 [OPTIONS]"
+    echo -e "  Options:"
+    for opt in "${!options[@]}"; do
+      echo -e "    $opt:\t${options[$opt]}"
+    done
+}
+
+
+function confirmation(){
+  local message="$1"
+  if [[ $2 != options ]]; then declare -n options=$2; fi;
+  if [[ $3 != result ]]; then declare -n result=$3; fi;
+
+  if [ ! -z "$4" ]; then
+    result="$4"
+    return 0
+  fi
+
+  local options_str=$(join_by "|" ${options[@]})
+  echo "${message} ($options_str)"
+  read -n 1 -r result
+  echo    # (optional) move to a new line
+
+  while ! [[ ${options[*]} =~ "$result" ]] ; do
+    echo "You must enter a valid option."
+    echo "${message} ($options_str)"
+    read -n 1 -r result
+    echo    # (optional) move to a new line
+  done
+
+}
+
+function join_by {
+  local d=${1-} f=${2-}
+  if shift 2; then
+    printf %s "$f" "${@/#/$d}"
+  fi
+}
