@@ -20,8 +20,8 @@ function main(){
   declare answer
   local confirmationOptions=(y n)
 
-  if git status --porcelain; then
-    confirmation "You have local changes. They might be overwritten if you continue. Do you want to abort?" confirmationOptions answer "$defaultAnswer"
+  if git status -u no --porcelain; then
+    confirmation "Your local changes might be overridden. Do you want to abort?" confirmationOptions answer "$defaultAnswer"
     if [ "$answer" == "y" ]; then
       echo "Aborting due to local git changes."
       exit 1
