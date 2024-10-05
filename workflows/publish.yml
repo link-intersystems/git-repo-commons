@@ -28,7 +28,7 @@ jobs:
 
     - name: Build with Gradle Wrapper
       run: |
-         ./gradlew --info publish closeAndReleaseStagingRepositories
+         ./gradlew --info publish afterPublish
       env:
         ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_SIGNING_KEY }}
         ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_SIGNING_PASSPHRASE }}
