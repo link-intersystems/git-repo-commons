@@ -16,6 +16,10 @@ on:
         description: 'Set the release version (overrides release type)'
         required: false
         type: string
+      additionalGradleArgs:
+        description: 'Add additional args to the Gradle build.'
+        required: false
+        type: string
 
 jobs:
   build:
@@ -55,7 +59,7 @@ jobs:
 
       - name: Build with Gradle Wrapper
         run: |
-          ./.bin/gradlew_release ${{ steps.validate.outputs.RELEASE_ARG }}
+          ./.bin/gradlew_release ${{ steps.validate.outputs.RELEASE_ARG }} ${{ inputs.additionalGradleArgs }}
 
       - name: Push changes
         uses: ad-m/github-push-action@master
